@@ -1,6 +1,8 @@
 package com.kms.seft203.api.dashboard;
 
-import static com.kms.seft203.utils.UrlConstraint.*;
+import static com.kms.seft203.utils.UrlConstraint.DASHBOARDS_DELETE_URL;
+import static com.kms.seft203.utils.UrlConstraint.DASHBOARDS_PUT_URL;
+import static com.kms.seft203.utils.UrlConstraint.DASHBOARDS_URL;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,26 +31,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DashboardApi {
 
-    // private static final Map<String, Dashboard> DATA = new HashMap<>();
     private final DashboardRepository dashboardRepository;
     private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<List<Dashboard>> getAll() {
-        // TODO: get all dashboard of a logged in user
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentUserId = getCurrentUserId();
 
-        String username = ((UserDetails) principal).getUsername();
-        String userId = userRepository.findByUsername(username).get().getId();
-        System.out.println("userId: " + userId);
-
-        return ResponseEntity.ok(dashboardRepository.findAllByUserId(userId));
+        return ResponseEntity.ok(dashboardRepository.findAllByUserId(currentUserId));
     }
 
     @PostMapping
     public ResponseEntity<Dashboard> save(@RequestBody SaveDashboardRequest request) {
+        String currentUserId = getCurrentUserId();
+
         Dashboard dashboard = new Dashboard();
-        dashboard.setUserId(request.getUserId());
+        dashboard.setUserId(currentUserId);
         dashboard.setTitle(request.getTitle());
         dashboard.setLayoutType(request.getLayoutType());
 
@@ -57,13 +55,12 @@ public class DashboardApi {
 
     @PutMapping(DASHBOARDS_PUT_URL)
     public ResponseEntity<Dashboard> update(@PathVariable String id, @RequestBody SaveDashboardRequest request) {
+        String currentUserId = getCurrentUserId();
         Optional<Dashboard> dashboardOptional = dashboardRepository.findById(id);
         if (dashboardOptional.isPresent()) {
-            Dashboard oldDashboard = dashboardOptional.get();
-            System.out.println("dashboard get by id: " + oldDashboard.getId());
-
             Dashboard newDashboard = convert(request);
             newDashboard.setId(id);
+            newDashboard.setUserId(currentUserId);
 
             return ResponseEntity.ok(dashboardRepository.save(newDashboard));
         }
@@ -89,6 +86,15 @@ public class DashboardApi {
         dashboard.setLayoutType(request.getLayoutType());
 
         return dashboard;
+    }
+
+    public String getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        String username = ((UserDetails) principal).getUsername();
+        String userId = userRepository.findByUsername(username).get().getId();
+
+        return userId;
     }
 
 }

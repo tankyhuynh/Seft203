@@ -1,6 +1,12 @@
 package com.kms.seft203.api.contact;
 
-import static com.kms.seft203.utils.UrlConstraint.*;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_DELETE_URL;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_DOWNLOAD_URL;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_GET_URL;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_PUT_URL;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_SEARCH_URL;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_UPLOAD_URL;
+import static com.kms.seft203.utils.UrlConstraint.CONTACTS_URL;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,7 +40,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(CONTACTS_URL)
 @RequiredArgsConstructor
 public class ContactApi {
-    // private static final Map<String, Contact> DATA = new HashMap<>();
     private final ContactRepository contactRepository;
     private final CSVService fileService;
 
@@ -90,10 +94,8 @@ public class ContactApi {
 
     @PostMapping(CONTACTS_UPLOAD_URL)
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
-        System.out.println("upload");
         String message = "";
         if (CSVHelper.hasCSVFormat(file)) {
-            System.out.println("CSVHelper.hasCSVFormat(file)");
 
             try {
                 fileService.save(file);
